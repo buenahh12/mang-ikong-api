@@ -1,126 +1,225 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Mang Ikong Foodhouse API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A REST API for **Mang Ikong Foodhouse**, a small Filipino restaurant. Customers can view the menu, place food orders and reserve tables. The admin manages the menu, updates order status and confirms reservations.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Built for **ITEC 116** with **NestJS**, **TypeORM**, **MySQL** and **JWT authentication**.
 
-## Description
+## Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Register and log in with **JWT** tokens; passwords are hashed with **bcrypt**
+- **Role-based access**: `customer` and `admin`
+- **Menu items**: public menu, admin-only add / edit / mark sold out / delete
+- **Orders**: the server looks up real prices, calculates each subtotal and the total, and saves the order with its items in one transaction
+- **Table reservations**: future dates only, and the same table can't be double-booked within 2 hours
+- **Input validation** on every request with `class-validator` (400 Bad Request on invalid data)
 
-## Project setup
+## Tech stack
 
-```bash
-$ npm install
+| Part | Technology |
+|---|---|
+| Framework | NestJS (TypeScript) |
+| Database | MySQL / MariaDB (XAMPP) |
+| ORM | TypeORM |
+| Authentication | Passport JWT, bcrypt |
+| Validation | class-validator, class-transformer |
+| API testing | Postman |
+
+## Project structure
+
+```
+src/
+├── auth/            # register, login, profile, JWT strategy, guards, decorators
+├── users/           # User entity + admin user management
+├── menu-items/      # MenuItem entity + menu CRUD
+├── orders/          # Order and OrderItem entities + ordering logic
+├── reservations/    # TableReservation entity + booking logic
+├── common/          # shared helpers (decimal transformer)
+├── app.module.ts    # loads .env and connects to MySQL
+├── main.ts          # starts the app, global validation
+└── seed.ts          # creates the admin account and sample menu
+database/
+└── mang_ikong_db.sql                          # database export (tables + sample data)
+Postman/
+└── Mang Ikong API.postman_collection.json     # all 28 requests
 ```
 
-## Compile and run the project
+Each module follows the same layers: **Controller** (routes) → **Service** (business logic) → **Repository** (TypeORM, database).
+
+## Setup
+
+### Requirements
+
+- Node.js 20 or newer
+- XAMPP (MySQL running on port 3306)
+
+### 1. Install packages
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone https://github.com/buenahh12/mang-ikong-api.git
+cd mang-ikong-api
+npm install
 ```
 
-## Run tests
+### 2. Create the database
+
+In XAMPP, start **MySQL**, open http://localhost/phpmyadmin and choose one:
+
+- **Option A, empty database:** create a database named `mang_ikong_db`. The tables are created automatically when the app starts.
+- **Option B, with sample data:** create `mang_ikong_db`, open it, go to **Import** and choose `database/mang_ikong_db.sql`.
+
+### 3. Create the `.env` file
+
+Copy `.env.example` to `.env` and set a `JWT_SECRET`:
+
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=
+DB_NAME=mang_ikong_db
+JWT_SECRET=any-long-random-text
+JWT_EXPIRES_IN=1d
+SEED_ADMIN_EMAIL=admin@mangikong.com
+SEED_ADMIN_PASSWORD=
+```
+
+### 4. Create the admin account (skip if you imported the .sql file)
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run seed
 ```
 
-## Deployment
+This creates the admin account and 8 sample menu items. It is safe to run more than once.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 5. Start the server
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+The API runs at **http://localhost:3000**.
 
-## Observability
+## Test accounts
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@mangikong.com | Admin@12345 |
+| Customer | juan@example.com | password123 |
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+The customer account comes from the `.sql` import. On an empty database, create one with `POST /auth/register`.
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+## Authentication
 
-This project is already instrumented. To connect it, run this and approve the code it prints at [observe.nestjs.com/link](https://observe.nestjs.com/link) - signing up for free if you have no account:
+1. `POST /auth/login` returns an `accessToken`.
+2. Send it on protected routes as a header: `Authorization: Bearer <accessToken>`.
 
-```bash
-$ npx @nestjs/observe link
+| Status | Meaning |
+|---|---|
+| 401 Unauthorized | No token, or the token is invalid or expired |
+| 403 Forbidden | Logged in, but not allowed (for example, a customer using an admin route) |
+
+## API endpoints (27)
+
+### Auth
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/auth/register` | Public | Create a customer account |
+| POST | `/auth/login` | Public | Log in and get a JWT |
+| GET | `/auth/profile` | Logged in | Current user's profile |
+
+### Users
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| GET | `/users` | Admin | List all users |
+| GET | `/users/:id` | Admin | Get one user |
+| PATCH | `/users/:id` | Admin | Update name, email or role |
+| DELETE | `/users/:id` | Admin | Delete a user (also deletes their orders and reservations) |
+
+### Menu items
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| GET | `/menu-items` | Public | List the menu (`?category=Rice`, `?available=true`) |
+| GET | `/menu-items/:id` | Public | Get one dish |
+| POST | `/menu-items` | Admin | Add a dish |
+| PATCH | `/menu-items/:id` | Admin | Edit a dish (only the fields sent) |
+| PATCH | `/menu-items/:id/availability` | Admin | Mark sold out or available |
+| DELETE | `/menu-items/:id` | Admin | Delete a dish (409 if it is in an order) |
+
+### Orders
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/orders` | Logged in | Place an order |
+| GET | `/orders/my` | Logged in | My orders |
+| GET | `/orders/:id` | Owner or admin | One order with its items |
+| GET | `/orders/:id/items` | Owner or admin | Items of an order |
+| GET | `/orders` | Admin | All orders (`?status=received`) |
+| PATCH | `/orders/:id/status` | Admin | `received` → `processing` → `completed` / `cancelled` |
+| DELETE | `/orders/:id` | Admin | Delete an order |
+
+Example request body for `POST /orders` (prices are never sent by the client):
+
+```json
+{
+  "items": [
+    { "itemId": 1, "quantity": 2 },
+    { "itemId": 5, "quantity": 2 }
+  ]
+}
 ```
 
-It writes the app key and secret into `.env` and makes every `nest start` script (`start`, `start:dev`, `start:debug`) load it. In production, set `OBSERVE_APP_KEY` and `OBSERVE_APP_SECRET` in the environment instead.
+### Table reservations
 
-Or do it by hand: create an application and an API key at [observe.nestjs.com](https://observe.nestjs.com), and set the pair as `OBSERVE_APP_KEY` and `OBSERVE_APP_SECRET` in the environment the app runs in.
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/reservations` | Logged in | Book a table |
+| GET | `/reservations/my` | Logged in | My reservations |
+| GET | `/reservations/:id` | Owner or admin | One reservation |
+| PATCH | `/reservations/:id` | Owner (while pending) or admin | Change table, time or party size |
+| GET | `/reservations` | Admin | All reservations (`?status=pending`) |
+| PATCH | `/reservations/:id/status` | Admin | Set `confirmed` or `cancelled` |
+| DELETE | `/reservations/:id` | Owner or admin | Delete a reservation |
 
-The free plan needs no payment details and covers 300,000 events a month. You can also browse the [live demo](https://www.observe-demo.nestjs.com/dashboard) first - the whole dashboard over a busy service's data, with nothing to install.
+Example request body for `POST /reservations`:
 
-## Resources
+```json
+{
+  "tableNumber": 3,
+  "reservationDate": "2026-12-24T18:00:00",
+  "partySize": 4
+}
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+Dates are returned in UTC, for example `2026-12-24T10:00:00.000Z` is 6:00 PM Philippine time.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observe](https://observe.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Database
 
-## Support
+| Table | Main columns | Relationship |
+|---|---|---|
+| `users` | user_id (PK), full_name, email (unique), password_hash, role, created_at | 1 user → many orders, many reservations |
+| `menu_items` | item_id (PK), item_name, description, price, category, is_available | 1 menu item → many order_items |
+| `orders` | order_id (PK), user_id (FK), order_date, total_amount, order_status | 1 order → many order_items |
+| `order_items` | order_item_id (PK), order_id (FK), item_id (FK), quantity, subtotal | links orders and menu_items |
+| `table_reservations` | reservation_id (PK), user_id (FK), table_number, reservation_date, party_size, status | many → 1 user |
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Testing with Postman
 
-## Stay in touch
+1. In Postman, click **Import** and choose `Postman/Mang Ikong API.postman_collection.json`.
+2. Send **Admin Login** or **Login**. A script saves the token automatically.
+3. Every other request uses that token (collection auth: Bearer `{{token}}`).
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Scripts
 
-## License
+| Command | What it does |
+|---|---|
+| `npm run start:dev` | Start the server and restart on file changes |
+| `npm run build` | Compile to `dist/` |
+| `npm run seed` | Create the admin account and sample menu |
+| `npm run lint` | Check the code with oxlint |
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## Author
+
+Jhon Federico Buenavista, BSIT 4C, ITEC 116
