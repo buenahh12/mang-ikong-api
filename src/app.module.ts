@@ -9,6 +9,7 @@ import { MenuItem } from './menu-items/entities/menu-item.entity';
 import { MenuItemsModule } from './menu-items/menu-items.module';
 import { OrderItem } from './orders/entities/order-item.entity';
 import { Order } from './orders/entities/order.entity';
+import { OrdersModule } from './orders/orders.module';
 import { TableReservation } from './reservations/entities/table-reservation.entity';
 import { User } from './users/entities/user.entity';
 
@@ -36,6 +37,7 @@ import { User } from './users/entities/user.entity';
     UsersModule,
     AuthModule,
     MenuItemsModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
