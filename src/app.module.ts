@@ -3,6 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 import { MenuItem } from './menu-items/entities/menu-item.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
 import { Order } from './orders/entities/order.entity';
@@ -30,6 +32,8 @@ import { User } from './users/entities/user.entity';
         synchronize: true,
       }),
     }),
+    UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
