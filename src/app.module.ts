@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { MenuItem } from './menu-items/entities/menu-item.entity';
+import { MenuItemsModule } from './menu-items/menu-items.module';
 import { OrderItem } from './orders/entities/order-item.entity';
 import { Order } from './orders/entities/order.entity';
 import { TableReservation } from './reservations/entities/table-reservation.entity';
@@ -34,6 +35,7 @@ import { User } from './users/entities/user.entity';
     }),
     UsersModule,
     AuthModule,
+    MenuItemsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

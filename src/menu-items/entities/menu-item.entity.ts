@@ -1,4 +1,10 @@
-import { Check, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Check,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { decimalTransformer } from '../../common/decimal.transformer';
 import { OrderItem } from '../../orders/entities/order-item.entity';
 
